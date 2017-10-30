@@ -85,20 +85,20 @@ public class Angular {
         	double difference = toDegrees(end) - toDegrees(begin);
         	double absoluteDiff = Math.abs(difference);
         	
-        	System.out.println("Begin = " + begin.toString());
-        	System.out.println("End = " + end.toString());
-        	System.out.println("The differnce is " + difference);
+//        	System.out.println("Begin = " + begin.toString());
+//        	System.out.println("End = " + end.toString());
+//        	System.out.println("The differnce is " + difference);
         	
         	degreeDiff = (int) absoluteDiff;
-        	System.out.println("Degreediff " + degreeDiff);
+//        	System.out.println("Degreediff " + degreeDiff);
         	double minutesRemainder = (absoluteDiff - degreeDiff) * 60.;
-        	System.out.println("Minutes remainder " + minutesRemainder);
+//        	System.out.println("Minutes remainder " + minutesRemainder);
         	minutesDiff = (int) (minutesRemainder);
-        	System.out.println("Minutes Diff " + minutesDiff);
+//        	System.out.println("Minutes Diff " + minutesDiff);
         	double secondsRemainder = (minutesRemainder - minutesDiff) * 60.;
-        	System.out.println("Seconds Remainder " + secondsRemainder);
+//        	System.out.println("Seconds Remainder " + secondsRemainder);
         	secondsDiff = (int) Math.round(secondsRemainder);
-        	System.out.println("Seconds Diff " + secondsDiff);
+//        	System.out.println("Seconds Diff " + secondsDiff);
         	
         	if (difference < 0) {
         		resultDirection = getDirectionComplement(begin.direction());
@@ -112,9 +112,9 @@ public class Angular {
         	minutesDiff = begin.minutes() + end.minutes();
         	secondsDiff = begin.seconds() + end.seconds();
         	
-        	System.out.println("Begin = " + begin.toString());
-        	System.out.println("End = " + end.toString());
-        	System.out.println("Degrees = " + degreeDiff + "; Minutes = " + minutesDiff + "; Seconds = " + secondsDiff);
+//        	System.out.println("Begin = " + begin.toString());
+//        	System.out.println("End = " + end.toString());
+//        	System.out.println("Degrees = " + degreeDiff + "; Minutes = " + minutesDiff + "; Seconds = " + secondsDiff);
         	resultDirection = end.direction();
         	// Account for Base 60 addition
         	if (secondsDiff >= (int) BASE_60) {
@@ -126,8 +126,8 @@ public class Angular {
         		degreeDiff++;
         	}
         	
-        	System.out.println("After afjusting for base 60");
-        	System.out.println("Degrees = " + degreeDiff + "; Minutes = " + minutesDiff + "; Seconds = " + secondsDiff);
+//        	System.out.println("After afjusting for base 60");
+//        	System.out.println("Degrees = " + degreeDiff + "; Minutes = " + minutesDiff + "; Seconds = " + secondsDiff);
         	
         	// If measuring Longitude and result > 180 degrees reverse direction
         	if (degreeDiff > 180 || (degreeDiff == 180 && (minutesDiff > 0 || secondsDiff > 0)) && 
