@@ -126,18 +126,19 @@ public class Bounds {
     }
     
     private static List<PointOfInterest> longitudeSort(List<PointOfInterest> points){
-    	
+    	System.out.println("Started sorting");
     	List<PointOfInterest> less = new ArrayList<PointOfInterest>();
     	List<PointOfInterest> equal = new ArrayList<PointOfInterest>();
     	List<PointOfInterest> greater = new ArrayList<PointOfInterest>();
     	
     	if (points.size() <= 1) {
+    		System.out.println("Empty or singleton");
     		return points;
     	}
     	else {
     		PointOfInterest partition = points.get(0);
-    		equal.add(partition);
     		for (int i = 1; i < points.size(); i++) {
+    			System.out.println("Comparing");
     			if (compareLongitude(points.get(i),  partition) < 0) {
     				less.add(points.get(i));
     			}
@@ -148,12 +149,14 @@ public class Bounds {
     				greater.add(points.get(i));
     			}
     		}
+    		System.out.println("Recursive step");
     		List<PointOfInterest> newLess = longitudeSort(less);
     		List<PointOfInterest> newEqual = longitudeSort(equal);
     		List<PointOfInterest> newGreater = longitudeSort(greater);
     		
     		List<PointOfInterest> result = new ArrayList<PointOfInterest>();
     		result.addAll(newLess);
+    		result.add(partition);
     		result.addAll(newEqual);
     		result.addAll(newGreater);
     		
