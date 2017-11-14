@@ -80,6 +80,10 @@ public class Bounds {
      */
 
     public static List<Angle> latitudeRange(Set<PointOfInterest> pointsOfInterest) {
+    	if (pointsOfInterest.size() < 1) {
+    		throw new RuntimeException("EmptySetException");
+    	}
+    	
         Angle min = null;
         Angle max = null;
         List<Angle> result = new ArrayList<Angle>();
@@ -95,6 +99,68 @@ public class Bounds {
         return result;
         
     }
+    
+    /* @param Angle - angle not modified by the method
+     * @return ture if the angle represents the North South pole
+     */
+    
+    private static boolean isPole(PointOfInterest a) {
+    	return (a.latitude().degrees() == 90 && a.latitude().minutes() ==  0 && 
+    			a.latitude().minutes() == 0 && 
+    			(a.latitude().direction() == NORTH || a.latitude().direction() == SOUTH));
+    }
+    
+    private static int compareLongitude(PointOfInterest x, PointOfInterest y) {
+    	if (min(x.longitude(), y.longitude()) == max(x.longitude(), y.longitude())) {
+    		return 0;
+    	}
+    	else if (min(x.longitude(), y.longitude()) == y.longitude()) {
+    		return 1;
+    	}
+    	else if (min(x.longitude(), y.longitude()) == x.longitude()) {
+    		return -1;
+    	}
+    	
+    	else throw new RuntimeException("Compare Failure");
+    	
+    }
+    
+    private static List<PointOfInterest> longitudeSort(List<PointOfInterest> points){
+    	
+    	List<PointOfInterest> less = new ArrayList<PointOfInterest>();
+    	List<PointOfInterest> equal = new ArrayList<PointOfInterest>();
+    	List<PointOfInterest> greater = new ArrayList<PointOfInterest>();
+    	
+    	if (points.size() <= 1) {
+    		return points;
+    	}
+    	else {
+    		PointOfInterest partition = points.get(0);
+    		equal.add(partition);
+    		for (int i = 1; i < points.size(); i++) {
+    			if (compareLongitude(points.get(i),  partition) < 0) {
+    				less.add(points.get(i));
+    			}
+    			else if (compareLongitude(points.get(i),  partition) == 0) {
+    				equal.add(points.get(i));
+    			}
+    			else if (compareLongitude(points.get(i),  partition) > 0) {
+    				greater.add(points.get(i));
+    			}
+    		}
+    		List<PointOfInterest> newLess = longitudeSort(less);
+    		List<PointOfInterest> newEqual = longitudeSort(equal);
+    		List<PointOfInterest> newGreater = longitudeSort(greater);
+    		
+    		List<PointOfInterest> result = new ArrayList<PointOfInterest>();
+    		result.addAll(newLess);
+    		result.addAll(newEqual);
+    		result.addAll(newGreater);
+    		
+    		return result;
+    	}    	
+    	// make sure you move poles to end
+    }
 
     /**
      * Find minimum-area longitude range that encloses all points of interest.
@@ -105,26 +171,144 @@ public class Bounds {
      * such that sweeping a longitude line from longitude list[0] EASTWARD to longitude
      * list[1] touches every point in pointsOfInterest.
      */
+    
+    // TODO: Account for when points are on the pole
+    // If min is on the pole then can just return longitude for max
+    // If max is on the pole then can just return longitude for min
+    // If set has more than 2 points and all other points on the pole then flip is fine
+    // if set has more than 2 points and all other elements not on pole then cannot flip
+    
+    // throw empty set exception if points of Interest empty
+    // create Point min and max
+    // store list of all other points in middlePoints
+    // for every point in points of interest
+    // 		compare to current min and max and swap if necessary
+    // 		if swapeed and min != max add to result and check to see if that point is on a pole
+    // 			if point is not on a pole set allPoles to False
+    // if min xor max is a pole then return [min, max] either min  or max
+    // else if id displacement(min, max).direction == WEST && result.size == 0 return (max, min)
+ 
+    // Fuck it use quicksort to sort the list then find min max that aren't poles
+    // if list index min = list index max - 1 and displacement(min, max) == WEST then return [mmin, max]
+    // else return[max, min] alo if all points between min and are  poles
+    //  
+    
+    
     public static List<Angle> longitudeRange(Set<PointOfInterest> pointsOfInterest) {
-        Angle min = null;
-        Angle max = null;
-        List<Angle> result = new ArrayList<Angle>();
-        
-        for (PointOfInterest point : pointsOfInterest) {
-        	Angle longitude = point.longitude();
-        	min = min(min, longitude);
-        	max = max(max, longitude);
-        }
-        
-        if (Angular.displacement(min, max).direction() == EAST) {        	
-        	result.add(min);
-        	result.add(max);
-        }
-        else {
-        	result.add(max);
-        	result.add(min);
-        }
-        return result;
+    	if (pointsOfInterest.isEmpty()) {
+    		throw new RuntimeException("EmptySetException");
+    	}
+    	
+    	// find true min and true max (ie if exists two points with same long then find the one not on a pole if all on a pole return next min or max
+    	// compare index of true min and max. if difference is one then return [min, max] or [max, min] if displacement(min, max) == WEST
+    	// if difference is zero retun [min, min]
+    	// if difference > 1 then return [min, max]
+    	
+    	List<Angle> result = new ArrayList<Angle>();	
+    
+		List<PointOfInterest> noPoles = new ArrayList<PointOfInterest>();
+		List<PointOfInterest> poles = new ArrayList<PointOfInterest>();
+		
+		for (PointOfInterest point : pointsOfInterest) {
+			if (!isPole(point)) {
+				noPoles.add(point);
+			} else {
+				poles.add(point);
+			}
+		}
+		
+		List<PointOfInterest> sortedPoints = longitudeSort(noPoles);
+		
+		PointOfInterest min = sortedPoints.get(0);
+		PointOfInterest max = sortedPoints.get(sortedPoints.size() - 1);
+		
+		if (sortedPoints.indexOf(min) == sortedPoints.indexOf(max)) {
+			result.add(min.longitude());
+			result.add(min.longitude());
+			System.out.println("Min = Max");
+		}
+		
+		else if (sortedPoints.indexOf(max) - sortedPoints.indexOf(min) == 1 && Angular.displacement(min.longitude(), max.longitude()).direction() == WEST) {
+				result.add(max.longitude());
+				result.add(min.longitude());
+				System.out.println("Min < Max");
+		}
+		else {
+			result.add(min.longitude());
+			result.add(max.longitude());
+			System.out.println("else");
+		}
+    	return result;
     }
+    
+//    public static List<Angle> longitudeRange(Set<PointOfInterest> pointsOfInterest) {
+//    	if (pointsOfInterest.size() < 1) {
+//    		throw new RuntimeException("EmptySetException");
+//    	}
+//    	
+//        PointOfInterest min = null;
+//        PointOfInterest max = null;
+//        List<PointOfInterest> middlePoints = new ArrayList<PointOfInterest>();
+//        
+//        List<Angle> result = new ArrayList<Angle>();
+//        
+//        boolean allPoles = true;
+//        
+//        for (PointOfInterest point : pointsOfInterest) {        	
+//        	Angle longitude = point.longitude();
+//        	
+//        	if (min(min.longitude(), longitude) == min.longitude() || max(max.longitude(), longitude) == max.longitude() ) {
+//        		if (!isPole(point.latitude())) { 
+//        			allPoles = false;
+//        			continue;
+//        		}
+//        		// middlePoints.add(point); Don't neet this really. was just keeping to chekc for poles
+//        	}
+//        	else {
+//        		if (min != max && !isPole(min.latitude())) {
+//        			allPoles = false;
+//        		}
+//        		if (min(longitude, min.longitude()) == longitude) {
+//        			min = point;
+//        			continue;
+//        		}
+//        		
+//        		if (max != min && !isPole(max.longitude())) {
+//        			allPoles = false;
+//        		}
+//        		
+//        		if (max(max.longitude(), longitude) == longitude) {
+//        			max = point;
+//        			continue;
+//        		}
+//        	}
+//        }
+//        
+//        	
+////        System.out.println("The displacement between min " + min + " and max " + max + " is " + Angular.displacement(min, max));
+////        System.out.println("Size of pointsOfInterest = " + pointsOfInterest.size());
+//        if (isPole(min.latitude()) && pointsOfInterest.size() == 2) {
+//        	result.add(max.longitude());
+//        	result.add(max.longitude());
+//        }
+//        		
+//        if (isPole(max.latitude()) && pointsOfInterest.size() == 2) {
+//        	result.add(min.longitude());
+//        	result.add(min.longitude());
+//
+//        }
+//        if (Angular.displacement(min.longitude(), max.longitude()).direction() == WEST && (pointsOfInterest.size() == 2)) {        	
+//        	result.add(max.longitude());
+//        	result.add(min.longitude());
+//        	System.out.println("Flipped");
+//        	System.out.println(result);
+//        }
+//        else if (true /*Account for poles*/){
+//        	result.add(min.longitude());
+//        	result.add(max.longitude());
+//        	System.out.println("Not Flipped");
+//        }
+//        return result;
+//    }
 
 }

@@ -126,7 +126,7 @@ public class Angular {
         		degreeDiff++;
         	}
         	
-//        	System.out.println("After afjusting for base 60");
+//        	System.out.println("After adjusting for base 60");
 //        	System.out.println("Degrees = " + degreeDiff + "; Minutes = " + minutesDiff + "; Seconds = " + secondsDiff);
         	
         	// If measuring Longitude and result > 180 degrees reverse direction
@@ -142,8 +142,8 @@ public class Angular {
 		        		}
 		        		
         	}    
-        	System.out.println("After flip if necessary");
-        	System.out.println("Degrees = " + degreeDiff + "; Minutes = " + minutesDiff + "; Seconds = " + secondsDiff);
+//        	System.out.println("After flip if necessary");
+//        	System.out.println("Degrees = " + degreeDiff + "; Minutes = " + minutesDiff + "; Seconds = " + secondsDiff);
         }
         return new Angle(degreeDiff, minutesDiff, secondsDiff, resultDirection);
     }
