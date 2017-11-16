@@ -31,7 +31,9 @@ public class BoundsTest {
     private static final Angle N1 = new Angle(10, 10, 10, CardinalDirection.NORTH);
     private static final Angle N2 = new Angle(10, 10, 20, CardinalDirection.NORTH);
     private static final Angle N3 = new Angle(10, 20, 10, CardinalDirection.NORTH);
+    private static final Angle N4 = new Angle(90, 0, 0, CardinalDirection.NORTH);
     private static final Angle S1 = new Angle(30, 30, 30, CardinalDirection.SOUTH);
+    private static final Angle S2 = new Angle(90, 0, 0, CardinalDirection.SOUTH);
     private static final Angle E1 = new Angle(10, 10, 10, CardinalDirection.EAST);
     private static final Angle E2 = new Angle(10, 10, 20, CardinalDirection.EAST);
     private static final Angle E3 = new Angle(10, 20, 10, CardinalDirection.EAST);
@@ -50,6 +52,10 @@ public class BoundsTest {
     private static final PointOfInterest POINT4 = new PointOfInterest(S1, W1, "Point4", "");
     private static final PointOfInterest POINT5 = new PointOfInterest(N1, E4, "Point5", "");
     private static final PointOfInterest POINT6 = new PointOfInterest(N1, W2, "Point6", "");
+    private static final PointOfInterest NORTH_POLE = new PointOfInterest(N4, W2, "North Pole", "");
+    private static final PointOfInterest SOUTH_POLE = new PointOfInterest(S2, W1, "South Pole", "");
+    private static final PointOfInterest NORTH_POLE2 = new PointOfInterest(N4, E1, "North Pole 2", "");
+    private static final PointOfInterest SOUTH_POLE2 = new PointOfInterest(S2, E3, "South Pole 2", "");
       
     // Test Sets
     	
@@ -177,7 +183,6 @@ public class BoundsTest {
     // between max and min but there is a point between min and max so no flip occurs
     @Test
     public void testLongitudeRangeAreaNoFlip() {
-    	System.out.println("Testing");
         List<Angle> expected = Arrays.asList(W2, E4);
         List<Angle> range = Bounds.longitudeRange(createSet(POINT1, POINT5, POINT6));
         assertEquals("expected correct length", 2, range.size());
@@ -185,10 +190,48 @@ public class BoundsTest {
         assertEquals("expected correct eastern bound", expected.get(1), range.get(1));
     }
     
-    // Longitutde test when either min or max is a pole
+    // Longitude test when min longitude is a pole
+    @Test
+    public void testLongitudeRangeMinIsPole() {
+        List<Angle> expected = Arrays.asList(W1, W1);
+        List<Angle> range = Bounds.longitudeRange(createSet(NORTH_POLE, POINT4, null));
+        assertEquals("expected correct length", 2, range.size());
+        assertEquals("expected correct western bound", expected.get(0), range.get(0));
+        assertEquals("expected correct eastern bound", expected.get(1), range.get(1));
+    }
     
-    // Longitude test when area from min to max > area from ax to min but all other points are on a pole
-    // so no flip is required. 
+    // Longitude test when max longitude is a pole
+    @Test
+    public void testLongitudeRangeMaxIsPole() {
+        List<Angle> expected = Arrays.asList(W1, W1);
+        List<Angle> range = Bounds.longitudeRange(createSet(NORTH_POLE2, POINT4, null));
+        assertEquals("expected correct length", 2, range.size());
+        assertEquals("expected correct western bound", expected.get(0), range.get(0));
+        assertEquals("expected correct eastern bound", expected.get(1), range.get(1));
+    }
+    
+    // Longitude test when all points are on a pole. Should return the minimum longitude.
+    @Test
+    public void testLongitudeRangeAllPoles() {
+        List<Angle> expected = Arrays.asList(W1, W1);
+        List<Angle> range = Bounds.longitudeRange(createSet(NORTH_POLE2, SOUTH_POLE, SOUTH_POLE2));
+        assertEquals("expected correct length", 2, range.size());
+        assertEquals("expected correct western bound", expected.get(0), range.get(0));
+        assertEquals("expected correct eastern bound", expected.get(1), range.get(1));
+    }
+    
+    
+    // Longitude test when area from min to max > area from max to min but all other points are on a pole
+    // so longitudeRange returns [max, min]
+    @Test
+    public void testLongitudeRangeFlipWithPoles() {
+    	 List<Angle> expected = Arrays.asList(E4, W2);
+         List<Angle> range = Bounds.longitudeRange(createSet(NORTH_POLE, POINT5, POINT6));
+         assertEquals("expected correct length", 2, range.size());
+         assertEquals("expected correct western bound", expected.get(0), range.get(0));
+         assertEquals("expected correct eastern bound", expected.get(1), range.get(1));
+    }
+    
     /*
      * Warning: all the tests you write here must be runnable against any
      * Bounds class that follows the spec. It will be run against several staff
