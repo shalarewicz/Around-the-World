@@ -23,11 +23,11 @@ public class BoundsTest {
      * comment looks like. Make sure you have partitions.
      */
 
-	// Instructor created points
+	// Instructor created angles
     private static final Angle LATITUDE_N = new Angle(42, 21, 35, CardinalDirection.NORTH);
     private static final Angle LONGITUDE_W = new Angle(71, 5, 31, CardinalDirection.WEST);
     
-    // Student created lines
+    // Student created angles
     private static final Angle N1 = new Angle(10, 10, 10, CardinalDirection.NORTH);
     private static final Angle N2 = new Angle(10, 10, 20, CardinalDirection.NORTH);
     private static final Angle N3 = new Angle(10, 20, 10, CardinalDirection.NORTH);
