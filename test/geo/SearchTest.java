@@ -168,7 +168,6 @@ public class SearchTest {
     // Tests map size n with m keywords and no matches found. 
     @Test
     public void testSearchMatchValues() {
-    	System.out.println("Starting...");
     	// Build set of keywords
     	Set<String> keywords = new HashSet<String>();
     	keywords.add("point");
@@ -181,23 +180,9 @@ public class SearchTest {
     	testMap.get(POINT3).add(POINT5);
     	testMap.put(POINT6, new ArrayList<PointOfInterest>()); // (POINT6, [POINT1] )
     	testMap.get(POINT6).add(POINT1);
-    	for (PointOfInterest key : testMap.keySet()) {
-    		System.out.print("Key = " + key.name() + ", (");
-    		for (PointOfInterest value : testMap.get(key)) {
-    			System.out.print(" " + value.name() + ", ");
-    		}
-    		System.out.println(")");
     		
-    		
-    		
-    	}
-    	System.out.println("Testing map " + testMap);
-    	System.out.println("Looking for keywords " + keywords);
-    	
-    	
     	// Test result
     	Set<PointOfInterest> points = Search.search(testMap, keywords);
-    	System.out.println("End");
     	assertEquals("Expected size of set", 1, points.size());
     	for (String keyword : keywords) {
     		String keywordNoCase = keyword.toLowerCase();

@@ -112,61 +112,40 @@ public class Search {
     	Set<PointOfInterest> result = new HashSet<PointOfInterest>();
     	
     	for (PointOfInterest key : pointOfInterestMap.keySet()) {
-    		List<PointOfInterest> values = pointOfInterestMap.get(key);
-    		// System.out.println("Testing key " + key.name() + ", " + key.description());
-    		if (containsKeywords(pointOfInterestMap, key, values, keywords)) {
+    		boolean allFound = true;
+    		for (String keyword : keywords) {
+    			String keywordNoCase = keyword.toLowerCase();
+	    		boolean found = false;
+	    		// check if the key contains the keyword
+	    		if (containsKeyword(key, keywordNoCase)) {
+	    			found = true;
+	    			// break;
+	    		}
+	    		else {
+		    		// Otherwise we will need to check each point in the value list
+		    		List<PointOfInterest> values = pointOfInterestMap.get(key);
+		    		
+		    		for (PointOfInterest point : values) {
+		    			if (containsKeyword(point, keywordNoCase)) {
+		    				found = true;
+		    				break;
+		    			}
+		    		}
+		    		
+	    		}	    		
+	    		if (!found) {
+	    			allFound = false;
+	    		}
+	    	}
+    		if (allFound) {
     			result.add(key);
     		}
-    	
     	}
-    	System.out.println("Resulting set is " + result);
     	return result;
     }
     
-    private static boolean containsKeywords(Map<PointOfInterest, List<PointOfInterest>> map, PointOfInterest key, List<PointOfInterest> values, Set<String> keywords) {
-    	Set<String> keywordsNoCase = new HashSet<String>();
-    	for (String keyword : keywords) {
-    		keywordsNoCase.add(keyword.toLowerCase());
-    	}
-    	
-    	boolean allKeywordsFound = true;
-    	for (String keyword : keywordsNoCase) {
-    		// System.out.println("Looking for keyword " + keyword);
-    		boolean found = false;
-    		if (key.name().toLowerCase().contains(keyword)) {
-    			found = true;
-    			continue;
-    		}
-    		else if (key.description().toLowerCase().contains(keyword)) {
-    			found = true;
-    			continue;
-    		}
-    		else {
-    			// System.out.println(keyword + " not in key...checking values");
-    			while (!found) {
-	    			for (PointOfInterest point : values) {
-	    				// System.out.println("Testing point " + point.name() + ", " + point.description());
-	    				if (point.name().toLowerCase().contains(keyword)) {
-	    					System.out.println("Found " + keyword + " in " + point.name());
-	    	    			found = true;
-	    	    			break;
-	    	    		}
-	    	    		else if (point.description().toLowerCase().contains(keyword)) {
-	    	    			 System.out.println("Found " + keyword + " in " + point.description());
-	    	    			found = true;
-	    	    			break;
-	    	    		}
-	    	    		else {
-	    	    			 System.out.println("Keyword not found in value point");
-	    	    		}
-	    			}
-	    		System.out.println("Could not find " + keyword + "\n");
-	    		allKeywordsFound = false;
-	    		break;
-    			}
-    		}
-    	}
-    	return allKeywordsFound;
-    	
+    private static boolean containsKeyword(PointOfInterest point, String keyword) {
+    	return (point.name().toLowerCase().contains(keyword) || point.description().toLowerCase().contains(keyword));
     }
+    
 }
