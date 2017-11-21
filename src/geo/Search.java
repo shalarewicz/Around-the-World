@@ -6,6 +6,9 @@ package geo;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * Methods for searching points of interest.
@@ -41,7 +44,49 @@ public class Search {
      *         as the key's duplicates, as described above.
      */
     public static Map<PointOfInterest, List<PointOfInterest>> collectDuplicates(List<PointOfInterest> pointsOfInterest) {
-        throw new RuntimeException("not implemented");
+    	Map<PointOfInterest, List<PointOfInterest>> result = new HashMap<PointOfInterest, List<PointOfInterest>>();
+    	
+        for (int i = 0; i < pointsOfInterest.size(); i++) {
+        	PointOfInterest point = pointsOfInterest.get(i);
+        	if (i == 0) {
+        		result.put(point, new ArrayList<PointOfInterest>());
+        		continue;
+        	}
+        	Set<PointOfInterest> keySet = result.keySet();
+        	ArrayList<PointOfInterest> keys = new ArrayList<PointOfInterest>(keySet);
+        	
+        	for (PointOfInterest key : keys) {
+        		if (duplicates(key, point)) {
+        			result.get(key).add(point);
+        		}
+        		else {
+        			result.put(point, new ArrayList<PointOfInterest>());
+        		}
+        	}
+        }
+        return result;
+    }
+    
+//    private static void insertPoint(Map<PointOfInterest, List<PointOfInterest>> map, PointOfInterest point) {
+//    	for (PointOfInterest key : map.keySet()) {
+//    		if (duplicates(key, point)) {
+//    			map.get(key).add(point);
+//    		}
+//    	}
+//    }
+    private static boolean duplicates(PointOfInterest key, PointOfInterest point) {
+    	String keyName = key.name().toLowerCase();
+    	Angle keyLatitude = key.latitude();
+    	Angle keyLongitude = key.longitude();
+    	
+    	String pointName = point.name().toLowerCase();
+    	Angle pointLatitude = point.latitude();
+    	Angle pointLongitude = point.longitude();
+    	
+    	return (keyName.equals(pointName) && 
+    			Math.abs(Angular.toDegrees(Angular.displacement(keyLatitude, pointLatitude))) < 0.05 && 
+    			Math.abs(Angular.toDegrees(Angular.displacement(keyLongitude, pointLongitude))) < 0.5 );
+    	
     }
 
 
@@ -64,7 +109,64 @@ public class Search {
      */
     public static Set<PointOfInterest> search(Map<PointOfInterest, List<PointOfInterest>> pointOfInterestMap,
                                               Set<String> keywords) {
-        throw new RuntimeException("not implemented");
-
+    	Set<PointOfInterest> result = new HashSet<PointOfInterest>();
+    	
+    	for (PointOfInterest key : pointOfInterestMap.keySet()) {
+    		List<PointOfInterest> values = pointOfInterestMap.get(key);
+    		// System.out.println("Testing key " + key.name() + ", " + key.description());
+    		if (containsKeywords(pointOfInterestMap, key, values, keywords)) {
+    			result.add(key);
+    		}
+    	
+    	}
+    	System.out.println("Resulting set is " + result);
+    	return result;
+    }
+    
+    private static boolean containsKeywords(Map<PointOfInterest, List<PointOfInterest>> map, PointOfInterest key, List<PointOfInterest> values, Set<String> keywords) {
+    	Set<String> keywordsNoCase = new HashSet<String>();
+    	for (String keyword : keywords) {
+    		keywordsNoCase.add(keyword.toLowerCase());
+    	}
+    	
+    	boolean allKeywordsFound = true;
+    	for (String keyword : keywordsNoCase) {
+    		// System.out.println("Looking for keyword " + keyword);
+    		boolean found = false;
+    		if (key.name().toLowerCase().contains(keyword)) {
+    			found = true;
+    			continue;
+    		}
+    		else if (key.description().toLowerCase().contains(keyword)) {
+    			found = true;
+    			continue;
+    		}
+    		else {
+    			// System.out.println(keyword + " not in key...checking values");
+    			while (!found) {
+	    			for (PointOfInterest point : values) {
+	    				// System.out.println("Testing point " + point.name() + ", " + point.description());
+	    				if (point.name().toLowerCase().contains(keyword)) {
+	    					System.out.println("Found " + keyword + " in " + point.name());
+	    	    			found = true;
+	    	    			break;
+	    	    		}
+	    	    		else if (point.description().toLowerCase().contains(keyword)) {
+	    	    			 System.out.println("Found " + keyword + " in " + point.description());
+	    	    			found = true;
+	    	    			break;
+	    	    		}
+	    	    		else {
+	    	    			 System.out.println("Keyword not found in value point");
+	    	    		}
+	    			}
+	    		System.out.println("Could not find " + keyword + "\n");
+	    		allKeywordsFound = false;
+	    		break;
+    			}
+    		}
+    	}
+    	return allKeywordsFound;
+    	
     }
 }

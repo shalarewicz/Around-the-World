@@ -143,13 +143,10 @@ public class SearchTest {
     	
     	// Build Test map
     	Map<PointOfInterest, List<PointOfInterest>> testMap = new HashMap<PointOfInterest, List<PointOfInterest>>();
-    	List<PointOfInterest> valueList = new ArrayList<PointOfInterest>();
-    	valueList.add(POINT6);
-    	testMap.put(POINT1, valueList); // POINT1, [POINT6])
-    	valueList.clear();
-    	assert valueList.isEmpty();
-    	valueList.add(POINT6);
-    	testMap.put(POINT5, valueList); // (POINT 5, [POINT6])
+    	testMap.put(POINT1, new ArrayList<PointOfInterest>()); // POINT1, [POINT6])
+    	testMap.get(POINT1).add(POINT6);
+    	testMap.put(POINT5, new ArrayList<PointOfInterest>()); // (POINT 5, [POINT6])
+    	testMap.get(POINT5).add(POINT6);
     	
     	// Test result
     	Set<PointOfInterest> points = Search.search(testMap, keywords);
@@ -171,6 +168,7 @@ public class SearchTest {
     // Tests map size n with m keywords and no matches found. 
     @Test
     public void testSearchMatchValues() {
+    	System.out.println("Starting...");
     	// Build set of keywords
     	Set<String> keywords = new HashSet<String>();
     	keywords.add("point");
@@ -178,18 +176,28 @@ public class SearchTest {
     	
     	// Build Test map
     	Map<PointOfInterest, List<PointOfInterest>> testMap = new HashMap<PointOfInterest, List<PointOfInterest>>();
-    	List<PointOfInterest> valueList = new ArrayList<PointOfInterest>();
-    	valueList.add(POINT4);
-    	valueList.add(POINT5);
-    	testMap.put(POINT3, valueList); // (POINT3, [POINT4,  POINT5] )
-    	valueList.clear();
-    	assert valueList.isEmpty();
-    	valueList.add(POINT1);
-    	testMap.put(POINT6, valueList); // (POINT6, [POINT1] )
+    	testMap.put(POINT3, new ArrayList<PointOfInterest>()); // (POINT3, [POINT4,  POINT5] )
+    	testMap.get(POINT3).add(POINT4);
+    	testMap.get(POINT3).add(POINT5);
+    	testMap.put(POINT6, new ArrayList<PointOfInterest>()); // (POINT6, [POINT1] )
+    	testMap.get(POINT6).add(POINT1);
+    	for (PointOfInterest key : testMap.keySet()) {
+    		System.out.print("Key = " + key.name() + ", (");
+    		for (PointOfInterest value : testMap.get(key)) {
+    			System.out.print(" " + value.name() + ", ");
+    		}
+    		System.out.println(")");
+    		
+    		
+    		
+    	}
+    	System.out.println("Testing map " + testMap);
+    	System.out.println("Looking for keywords " + keywords);
     	
     	
     	// Test result
     	Set<PointOfInterest> points = Search.search(testMap, keywords);
+    	System.out.println("End");
     	assertEquals("Expected size of set", 1, points.size());
     	for (String keyword : keywords) {
     		String keywordNoCase = keyword.toLowerCase();
@@ -204,7 +212,7 @@ public class SearchTest {
         				break;
         			}
     			}
-    			assertTrue("Expected to contian keyword", foundMatch);
+    			assertTrue("Expected to contain keyword", foundMatch);
     		}
     	}
     	assertTrue(!points.contains(POINT6));
